@@ -58,7 +58,7 @@ client.on("message_create", async (msg) => {
   try {
     if (config.pmpermit_enabled == "true") {
       var otherChat = await (await msg.getChat()).getContact();
-      if (
+      if (msg.fromMe &&
         otherChat.isUser &&
         !(await pmpermit.isPermitted(otherChat.number)) &&
         !otherChat.isMe &&
