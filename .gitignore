@@ -17,3 +17,4 @@ cache/*
 public/*
 !public/readme.txt
 session/assets/qr.svg
+extras/
