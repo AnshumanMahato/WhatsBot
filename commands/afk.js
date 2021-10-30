@@ -1,13 +1,17 @@
 //jshint esversion:8
-const execute = async (client,msg/*,args*/) => {
+const logger = require('../logger');
 
+const execute = async (client,msg,args) => {
+    msg.delete(true);
+    await setAfk(args.join(' '));
+    await logger(client,`You're now marked as offline. To mark yourself back online, use !awake`);
 };
 
 module.exports = {
-    name: '', //name of the module
-    description: '', // short description of what this command does
-    command: '', //command with prefix. Ex command: '!test'
-    commandType: '', // admin|info|plugin|group
-    isDependent: true | false, //whether this command is related/dependent to some other command
-    help: '', // a string descring how to use this command Ex = help : 'To use this command type !test arguments'
+    name: 'Away',
+    description: 'Mark yourself as offline.',
+    command: '!afk',
+    commandType: 'admin',
+    isDependent: false,
+    help: 'Use !afk to mark yourself as offline. Recipients will be replied with an automated message when you\'re offline. You can also provide further information with the command like this -\n\n!afk [info]\n\nTo mark yourself back online, use !awake',
     execute};
