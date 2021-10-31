@@ -35,6 +35,7 @@ client.on("auth_failure", () => {
 
 client.on("ready", () => {
   console.log("Bot has been started");
+  logger(client,"Bot has been started");
 });
 
 client.on("message", async (msg) => {

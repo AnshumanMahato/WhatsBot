@@ -12,34 +12,19 @@ async function setDb() {
   }
 }
 
-async function insert(reason, time) {
-  let { conn, coll } = await setDb();
-  try {
-    await coll.insertOne({ isAfk: true, reason, time });
-    return true;
-  } catch (error) {
-    return false;
-  } finally {
-    if (conn) {
-      await conn.close();
-    }
-  }
-}
-
 async function read() {
   let { conn, coll } = await setDb();
   try {
-    let data = await coll.findOne({ isAfk: true });
+    let data = await coll.findOne({ afk: true });
     if (data) {
-      // save the cache for later usage
       fs.writeFileSync(
         path.join(__dirname, `../cache/AFK.json`),
-        JSON.stringify({ ...data, found: true })
+        JSON.stringify(data)
       );
     }
-    return data ? { ...data, found: true } : { found: false };
+    return data ? data : null;
   } catch (error) {
-    return { found: false };
+    return null;
   } finally {
     if (conn) {
       await conn.close();
@@ -47,41 +32,33 @@ async function read() {
   }
 }
 
-async function remove() {
-  let { conn, coll } = await setDb();
+async function getAFKData() {
+  let data;
   try {
-    const data = await coll.deleteOne({ isAfk: true });
-    console.log(data);
+    data = JSON.parse(fs.readFileSync(path.join(__dirname, `../cache/AFK.json`)));
   } catch (error) {
-    console.log(error);
-  } finally {
-    if (conn) {
-      await conn.close();
-    }
+    data = await read();
   }
-}
 
-async function set() {
-  let data = await insert('asdf',Date.now());
-  console.log('insert',data);
-  data = await read();
-  console.log('read',data);
-  data = await remove();
-  console.log("remove", data);
+  return data;
 }
-
-set();
 
 async function setAfk(reason) {
-  let { conn, coll } = await setDb();
+
+  let data = await getAFKData();
+
+  if(data)
+    return true;
+
+  const { conn, coll } = await setDb();
   const time = Math.floor(Date.now() / 1000);
-  let data = { isAfk: true, reason, time };
+  data = { afk: true, reason, time };
 
   try {
     await coll.insertOne(data);
     fs.writeFileSync(
       path.join(__dirname, `../cache/AFK.json`),
-      JSON.stringify({ ...data, found: true })
+      JSON.stringify(data)
     );
     return true;
   } catch (error) {
@@ -94,6 +71,7 @@ async function setAfk(reason) {
 }
 
 async function setOnline() {
+
   let { conn, coll } = await setDb();
   try {
     fs.unlinkSync(path.join(__dirname, `../cache/AFK.json`));
@@ -101,8 +79,7 @@ async function setOnline() {
   } catch (nofile) {}
 
   try {
-    const { deletedCount: fileDeleted } = await coll.deleteOne({ isAfk: true });
-    if (!fileDeleted) return false;
+    await coll.deleteOne({ afk: true });
     return true;
   } catch (error) {
     return false;
@@ -111,6 +88,11 @@ async function setOnline() {
       await conn.close();
     }
   }
+}
+
+async function handler(msg) {
+  let data = await getAFKData();
+  
 }
 
 // AFK_REASONS = (
