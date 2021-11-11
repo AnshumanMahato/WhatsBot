@@ -90,16 +90,17 @@ function getAfkString(){
 async function setAfk(reason) {
 
   let data = await getAFKData();
+  console.log(data);
 
   if(data)
     return true;
 
   const { conn, coll } = await setDb();
-  const time = Math.floor(Date.now() / 1000);
+  const time = Math.floor(Date.now());
   data = { afk: true, reason, time, chats: new Set() };
 
   try {
-    await coll.insertOne(data);
+    console.log(await coll.insertOne(data));
     fs.writeFileSync(
       path.join(__dirname, `../cache/AFK.json`),
       JSON.stringify(data)
@@ -151,8 +152,8 @@ async function handler(sender) {
   
   if(data) {
     let timediff = calcTime(data.time,Date.now());
-    if(!data.chats.has(sender))
-      await updateChatList(data.chats.add(sender));
+    // if(!data.chats.has(sender))
+    //   await updateChatList(data.chats.add(sender));
     return {
       reason: data.reason,
       timediff
@@ -162,6 +163,9 @@ async function handler(sender) {
     return null;
   }
 }
+console.log(Date.now());
+
+console.log(calcTime(1636625669,Date.now()));
 
 module.exports = {
   setAfk,

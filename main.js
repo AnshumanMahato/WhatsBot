@@ -6,6 +6,7 @@ const pmpermit = require("./helpers/pmpermit");
 const config = require("./config");
 const fs = require("fs");
 const logger = require("./logger");
+const afk = require("./helpers/afkhandler");
 
 const client = new Client({
   puppeteer: { headless: true, args: ["--no-sandbox"] },
@@ -39,6 +40,7 @@ client.on("ready", () => {
 });
 
 client.on("message", async (msg) => {
+
   if (!msg.author && config.pmpermit_enabled == "true") {
     // Pm check for pmpermit module
     var checkIfAllowed = await pmpermit.handler(msg.from.split("@")[0]); // get status
@@ -54,9 +56,17 @@ client.on("message", async (msg) => {
       }
     }
   }
+
+  let afkData = await afk.handler(msg.from);
+  if(afkData) {
+    msg.reply(JSON.stringify(afkData,null,4));
+  }
+
+  
 });
 
 client.on("message_create", async (msg) => {
+  console.log(await msg.getContact());
   // auto pmpermit
   try {
     if (config.pmpermit_enabled == "true") {

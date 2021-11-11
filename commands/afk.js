@@ -1,10 +1,16 @@
 //jshint esversion:8
 const logger = require('../logger');
+const { setAfk } = require('../helpers/afkhandler');
 
 const execute = async (client,msg,args) => {
     msg.delete(true);
-    await setAfk(args.join(' '));
-    await logger(client,`You're now marked as offline. To mark yourself back online, use !awake`);
+    let isAfk = await setAfk(args.join(' '));
+    if(isAfk){
+        await logger(client,`You're now marked as offline. To mark yourself back online, use !online`);
+    }
+    else{
+        await logger(client,`Some error occured.`);
+    }
 };
 
 module.exports = {
