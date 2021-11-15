@@ -44,10 +44,16 @@ async function getAFKData() {
   return data;
 }
 
-async function updateChatList(chats) {
+async function updateChatList(chat) {
   const {conn,coll} = await database('afk');
   try {
-    await coll.updateOne({afk:true},{$set:{chats}});
+    let data = await getAFKData();
+    let chatlist = new Set(data?.chats);
+    if(!chatlist.has(chat)) {
+      chatlist.add(chat);
+      await coll.updateOne({afk:true},{$set:{chats : Array.from(chatlist)}});
+    }
+    
     return true;
   } catch (error) {
     return false;
@@ -97,7 +103,7 @@ async function setAfk(reason) {
 
   const { conn, coll } = await setDb();
   const time = Math.floor(Date.now());
-  data = { afk: true, reason, time, chats: new Set() };
+  data = { afk: true, reason, time, chats: [] };
 
   try {
     console.log(await coll.insertOne(data));
@@ -152,11 +158,11 @@ async function handler(sender) {
   
   if(data) {
     let timediff = calcTime(data.time,Date.now());
-    // if(!data.chats.has(sender))
-    //   await updateChatList(data.chats.add(sender));
+    await updateChatList(sender);
     return {
       reason: data.reason,
-      timediff
+      timediff,
+      msg: getAfkString()
     };
   }
   else {
