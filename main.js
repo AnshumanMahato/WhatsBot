@@ -1,4 +1,4 @@
-//jshint esversion:8
+//jshint esversion:11
 const express = require("express");
 const app = express();
 const { Client } = require("whatsapp-web.js");
@@ -55,18 +55,25 @@ client.on("message", async (msg) => {
         msg.reply(checkIfAllowed.msg);
       }
     }
+    else {
+      const contact = await msg.getContact();
+      const afkData = await afk.handler(contact?.name || contact?.pushname);
+      if(afkData) {
+        const {reason,timediff} = afkData;
+        let lastseen = "";
+        lastseen += timediff[0]?`${timediff[0]} hrs `:"";
+        lastseen += timediff[1]?`${timediff[1]} min `:"";
+        lastseen += `${timediff[2]} sec ago`;
+        await msg.reply(`${afkData.msg}\n\n😊😊😊\n\nI am currently offline...\n\n*Reason*: ${reason}\n*Last Seen*:${lastseen}`);
+      }
+    }
   }
-
-  let afkData = await afk.handler(msg.from);
-  if(afkData) {
-    msg.reply(JSON.stringify(afkData,null,4));
-  }
-
   
 });
 
+
 client.on("message_create", async (msg) => {
-  console.log(await msg.getContact());
+  console.log((await msg.getContact())?.pushname);
   // auto pmpermit
   try {
     if (config.pmpermit_enabled == "true") {

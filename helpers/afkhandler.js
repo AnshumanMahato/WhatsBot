@@ -51,6 +51,8 @@ async function updateChatList(chat) {
     let chatlist = new Set(data?.chats);
     if(!chatlist.has(chat)) {
       chatlist.add(chat);
+      data.chats = Array.from(chatlist);
+      console.log(data);
       await coll.updateOne({afk:true},{$set:{chats : Array.from(chatlist)}});
     }
     
