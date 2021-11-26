@@ -52,7 +52,10 @@ async function updateChatList(chat) {
     if(!chatlist.has(chat)) {
       chatlist.add(chat);
       data.chats = Array.from(chatlist);
-      console.log(data);
+      fs.writeFileSync(
+        path.join(__dirname, `../cache/AFK.json`),
+        JSON.stringify(data)
+      );
       await coll.updateOne({afk:true},{$set:{chats : Array.from(chatlist)}});
     }
     
@@ -101,7 +104,7 @@ async function setAfk(reason) {
   console.log(data);
 
   if(data)
-    return true;
+    return data;
 
   const { conn, coll } = await setDb();
   const time = Math.floor(Date.now());
@@ -113,9 +116,9 @@ async function setAfk(reason) {
       path.join(__dirname, `../cache/AFK.json`),
       JSON.stringify(data)
     );
-    return true;
+    return {set: true};
   } catch (error) {
-    return false;
+    return {set: false};
   } finally {
     if (conn) {
       await conn.close();

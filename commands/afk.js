@@ -4,9 +4,13 @@ const { setAfk } = require('../helpers/afkhandler');
 
 const execute = async (client,msg,args) => {
     msg.delete(true);
-    let isAfk = await setAfk(args.join(' '));
-    if(isAfk){
-        await logger(client,`You're now marked as offline. To mark yourself back online, use !online`);
+    let data = await setAfk(args.join(' '));
+    if(data?.afk){
+        const time = new Intl.DateTimeFormat('en-IN',{dateStyle:'short',timeStyle:'medium',timeZone:'Asia/Kolkata'}).format(data.time);
+        await logger(client,`You've already marked yourself offline at ${time}. If you want to set yourself back online, use !online`);
+    }
+    else if(data?.set) {
+        await logger(client,`You've marked yourself offline! To mark yourself back online use !online`);
     }
     else{
         await logger(client,`Some error occured.`);
