@@ -6,7 +6,7 @@ const execute = async (client,msg,args) => {
     msg.delete(true);
     let data = await setAfk(args.join(' '));
     if(data?.afk){
-        const time = new Intl.DateTimeFormat('en-IN',{dateStyle:'short',timeStyle:'medium',timeZone:'Asia/Kolkata'}).format(data.time);
+        const time = new Intl.DateTimeFormat('en-IN',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kolkata'}).format(data.time);
         await logger(client,`You've already marked yourself offline at ${time}. If you want to set yourself back online, use !online`);
     }
     else if(data?.set) {

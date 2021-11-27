@@ -4,10 +4,13 @@ const logger = require('../logger');
 const execute = async (client,msg) => {
     let data = await setOnline();
     if(data) {
-        await logger(client, JSON.stringify(data,null,4));
+        let msg = `You're now back online. `;
+        if(data.chats.length)
+            msg += `While you were offline you recieved messages from \`\`\`${data.chats}\`\`\``;
+        await logger(client, msg);
     }
     else {
-        await logger(client, `Your aren't afk`);
+        await logger(client, `Your aren't afk.`);
     }
 };
 
