@@ -48,17 +48,14 @@ async function updateChatList(chat) {
   const {conn,coll} = await database('afk');
   try {
     let data = await getAFKData();
-    let chatlist = new Set(data?.chats);
-    if(!chatlist.has(chat)) {
-      chatlist.add(chat);
-      data.chats = Array.from(chatlist);
-      fs.writeFileSync(
-        path.join(__dirname, `../cache/AFK.json`),
-        JSON.stringify(data)
-      );
-      await coll.updateOne({afk:true},{$set:{chats : Array.from(chatlist)}});
-    }
-    
+    let chatlist = new Map(data?.chats);
+    chatlist.set(chat,Date.now);
+    data.chats = Array.from(chatlist);
+    fs.writeFileSync(
+      path.join(__dirname, `../cache/AFK.json`),
+      JSON.stringify(data)
+    );
+    await coll.updateOne({afk:true},{$set:{chats : Array.from(chatlist)}});
     return true;
   } catch (error) {
     return false;
@@ -163,20 +160,23 @@ async function handler(sender) {
   
   if(data) {
     let timediff = calcTime(data.time,Date.now());
-    await updateChatList(sender);
-    return {
-      reason: data.reason,
-      timediff,
-      msg: getAfkString()
-    };
+    let chatlist = new Map(data?.chats);
+    let [,,min] = calcTime(chatlist.get(sender) || Date.now(),Date.now());
+    if(!chatlist.has(sender) || min >= 15)
+    {
+      await updateChatList(sender);
+      return {
+        reason: data.reason,
+        timediff,
+        msg: getAfkString()
+      };
+    }
+    return null;  
   }
   else {
     return null;
   }
 }
-console.log(Date.now());
-
-console.log(calcTime(1636625669,Date.now()));
 
 module.exports = {
   setAfk,
