@@ -49,7 +49,8 @@ async function updateChatList(chat) {
   try {
     let data = await getAFKData();
     let chatlist = new Map(data?.chats);
-    chatlist.set(chat,Date.now);
+    chatlist.set(chat,Date.now());
+    console.log(chatlist);
     data.chats = Array.from(chatlist);
     fs.writeFileSync(
       path.join(__dirname, `../cache/AFK.json`),
@@ -138,7 +139,7 @@ async function setOnline() {
     try {
       await coll.deleteOne({ afk: true });
       return {
-        chats: data.chats,
+        chats: data.chats.map((ele) => ele[0]),
         timediff
       };
     } catch (error) {
@@ -166,12 +167,13 @@ async function handler(sender) {
     {
       await updateChatList(sender);
       return {
+        notify: true,
         reason: data.reason,
         timediff,
         msg: getAfkString()
       };
     }
-    return null;  
+    return {notify:false};  
   }
   else {
     return null;

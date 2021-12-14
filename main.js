@@ -60,13 +60,21 @@ client.on("message", async (msg) => {
       const afkData = await getAfk(contact?.name || contact?.pushname);
       if(afkData) {
         //if user is afk
-        const {reason,timediff} = afkData;
-        let lastseen = "";
-        lastseen += timediff[0]?`${timediff[0]} days `:"";
-        lastseen += timediff[1]?`${timediff[1]} hrs `:"";
-        lastseen += timediff[2]?`${timediff[2]} min `:"";
-        lastseen += `${timediff[3]} sec ago`;
-        await msg.reply(`${afkData.msg}\n\n😊😊😊\n\nI am currently offline...\n\n*Reason*: ${reason}\n*Last Seen*:${lastseen}`);
+        const chat = await msg.getChat();
+        await chat.sendSeen();
+        
+        if(afkData.notify) {
+          const {reason,timediff} = afkData;
+          let lastseen = "";
+          lastseen += timediff[0]?`${timediff[0]} days `:"";
+          lastseen += timediff[1]?`${timediff[1]} hrs `:"";
+          lastseen += timediff[2]?`${timediff[2]} min `:"";
+          lastseen += `${timediff[3]} sec ago`;
+          await msg.reply(`${afkData.msg}\n\n😊😊😊\n\nI am currently offline...\n\n*Reason*: ${reason}\n*Last Seen*:${lastseen}`);  
+        }
+
+        await chat.markUnread();
+        
       }
     }
   }
